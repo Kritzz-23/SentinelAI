@@ -1,0 +1,1 @@
+{"scripts":{"start":"node dist/main.js","build":"tsc -p tsconfig.json","dev":"ts-node src/main.ts"},"dependencies":{"@nestjs/common":"^11.0.0","@nestjs/core":"^11.0.0","@nestjs/platform-express":"^11.0.0","reflect-metadata":"^0.2.2","rxjs":"^7.8.1","http-proxy-middleware":"^3.0.3"},"devDependencies":{"typescript":"^5.7.2","ts-node":"^10.9.2","@types/node":"^22.10.5"}}
