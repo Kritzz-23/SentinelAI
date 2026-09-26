@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+  <title>SentinelAI — Incident Command Center &amp; AI Telemetry Intelligence</title>
+  <meta name="title" content="SentinelAI — Incident Command Center &amp; AI Telemetry Intelligence">
+  <meta name="description" content="AI-powered real-time incident intelligence and telemetry analysis platform. Automated log clustering, root-cause diagnosis, and incident lifecycle management by Kritika Giri (@Kritzz-23).">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-brand">
+      <div class="brand-icon">🛡️</div>
+      <div class="brand-text">
+        <h1>Sentinel<span>AI</span></h1>
+        <div class="brand-subtitle">INCIDENT COMMAND &bull; v1.0.0-PROD</div>
+      </div>
+    </div>
+
+    <div class="nav-center">
+      <div class="system-status-pill">
+        <span class="pulse-dot"></span>
+        <span>CLUSTER ACTIVE &bull; 99.94% UPTIME</span>
+      </div>
+    </div>
+
+    <div class="nav-actions">
+      <button class="btn btn-secondary btn-sm" id="inject-anomaly-btn" title="Simulate real-time service disruption">
+        💥 Simulate Outage
+      </button>
+
+      <button class="btn btn-primary btn-sm" id="open-create-modal-btn">
+        + New Incident
+      </button>
+
+      <a href="https://github.com/Kritzz-23/SentinelAI" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" title="View GitHub Repository">
+        🐙 GitHub
+      </a>
+
+      <a href="https://kritzz-23.github.io/" class="btn btn-secondary btn-sm" title="Back to Kritika's Portfolio">
+        👤 Portfolio
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Application Workspace -->
+  <main class="app-container">
+
+    <!-- Metrics Row -->
+    <section class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-meta">
+          <span class="metric-label">Total Incidents</span>
+          <span class="metric-value" id="metric-total">18</span>
+        </div>
+        <div class="metric-icon-box" style="color: var(--accent-primary);">📈</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-meta">
+          <span class="metric-label">Active / Open</span>
+          <span class="metric-value" id="metric-open" style="color: #f59e0b;">3</span>
+        </div>
+        <div class="metric-icon-box" style="color: #f59e0b;">⚠️</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-meta">
+          <span class="metric-label">Critical Alerts</span>
+          <span class="metric-value" id="metric-critical" style="color: #ef4444;">1</span>
+        </div>
+        <div class="metric-icon-box" style="color: #ef4444;">🚨</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-meta">
+          <span class="metric-label">MTTR (Mean Time to Resolution)</span>
+          <span class="metric-value" id="metric-mttr" style="color: #10b981;">14.2m</span>
+        </div>
+        <div class="metric-icon-box" style="color: #10b981;">⏱️</div>
+      </div>
+    </section>
+
+    <!-- Split-Pane Workspace: Feed & Deep Investigation Inspector -->
+    <section class="workspace-grid">
+
+      <!-- Left Panel: Incident Feed -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <h2>🚨 Incident Triage Stream</h2>
+            <div class="panel-subtitle">Real-time service events and anomaly alerts</div>
+          </div>
+        </div>
+
+        <div class="feed-controls">
+          <div class="search-input-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="feed-search-input" class="feed-search-input" placeholder="Search service, error signature, or ID..." spellcheck="false">
+          </div>
+
+          <div class="severity-filter-bar">
+            <button class="filter-chip active" data-sev="all">All</button>
+            <button class="filter-chip" data-sev="critical">Critical</button>
+            <button class="filter-chip" data-sev="high">High</button>
+            <button class="filter-chip" data-sev="medium">Medium</button>
+            <button class="filter-chip" data-sev="low">Low</button>
+          </div>
+        </div>
+
+        <!-- Scrollable Incident Rows Container -->
+        <div class="incident-feed-list" id="incident-list-container">
+          <!-- Rendered dynamically via app.js -->
+        </div>
+      </div>
+
+      <!-- Right Panel: Deep Investigation & AI RCA Console -->
+      <div class="panel-card investigation-panel">
+        <div class="panel-header">
+          <div class="panel-title-group">
+            <h2>🔬 Root Cause Analysis Console</h2>
+            <div class="panel-subtitle">Automated telemetry correlation &amp; incident runbooks</div>
+          </div>
+        </div>
+
+        <div class="investigation-body" id="investigation-container">
+          <!-- Injected dynamically via app.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Bottom: Live Telemetry Ticker Console -->
+    <section class="telemetry-console-card">
+      <div class="telemetry-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="pulse-dot" style="width: 6px; height: 6px;"></span>
+          <strong>LIVE DISTRIBUTED TELEMETRY STREAM</strong> &bull; Microservices Heartbeat
+        </div>
+        <button class="btn btn-secondary btn-sm" id="stream-toggle-btn">Pause Stream</button>
+      </div>
+      <div class="telemetry-stream-body" id="telemetry-stream-body">
+        <!-- Lines injected dynamically -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal: Report New Incident -->
+  <div class="modal-backdrop" id="create-incident-modal" role="dialog" aria-modal="true">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>Report Service Disruption</h3>
+        <button class="btn btn-secondary btn-sm" id="close-modal-btn">&times;</button>
+      </div>
+
+      <div class="form-group">
+        <label for="new-title">Incident Title *</label>
+        <input type="text" id="new-title" class="form-control" placeholder="e.g. Redis Cache Eviction Surge">
+      </div>
+
+      <div class="form-group">
+        <label for="new-service">Affected Microservice *</label>
+        <input type="text" id="new-service" class="form-control" placeholder="e.g. payments-api, auth-service, db-cluster">
+      </div>
+
+      <div class="form-group">
+        <label for="new-severity">Severity Level</label>
+        <select id="new-severity" class="form-control">
+          <option value="critical">Critical (P0 - Service Down)</option>
+          <option value="high" selected>High (P1 - Major Degradation)</option>
+          <option value="medium">Medium (P2 - Partial Impact)</option>
+          <option value="low">Low (P3 - Minor/Internal)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="new-desc">Incident Description</label>
+        <textarea id="new-desc" class="form-control" placeholder="Provide a summary of the observed customer or system symptoms..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="new-logs">Telemetry Logs Evidence</label>
+        <textarea id="new-logs" class="form-control" placeholder="Paste relevant container, Nginx, or database error logs here..."></textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancel-modal-btn">Cancel</button>
+        <button class="btn btn-primary" id="submit-incident-btn">Dispatch Incident 🚨</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-box" class="toast-box"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
