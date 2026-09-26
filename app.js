@@ -128,6 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderSelectedIncident();
   updateMetrics();
   initEventListeners();
+  initSentinelAuth();
   startSyntheticTelemetry();
 });
 
@@ -581,4 +582,163 @@ function showToast(message) {
   toast._timer = setTimeout(() => {
     toast.classList.remove('show');
   }, 2600);
+}
+
+/* ==========================================================================
+   Authentication & Session System (RBAC + JWT Simulation)
+   ========================================================================== */
+function initSentinelAuth() {
+  const userBadge = document.getElementById('auth-user-badge');
+  const loginBtn = document.getElementById('auth-login-btn');
+  const userNameEl = document.getElementById('auth-user-name');
+  const userRoleEl = document.getElementById('auth-user-role');
+  const logoutBtn = document.getElementById('auth-logout-btn');
+
+  const authModal = document.getElementById('auth-modal');
+  const closeAuthBtn = document.getElementById('close-auth-modal');
+  const tabLoginBtn = document.getElementById('tab-login-btn');
+  const tabSignupBtn = document.getElementById('tab-signup-btn');
+  const loginForm = document.getElementById('login-form');
+  const signupForm = document.getElementById('signup-form');
+  const quickDemoBtn = document.getElementById('quick-demo-login-btn');
+
+  let user = null;
+  try {
+    const raw = localStorage.getItem('sentinel_auth_user');
+    if (raw) {
+      user = JSON.parse(raw);
+    } else {
+      user = {
+        name: "Kritika Giri",
+        email: "kritika.giri@brainware.edu",
+        role: "SRE Lead",
+        token: "jwt_sentinel_" + btoa(JSON.stringify({ sub: "kg_23", role: "SRE Lead", exp: Date.now() + 86400000 }))
+      };
+      localStorage.setItem('sentinel_auth_user', JSON.stringify(user));
+    }
+  } catch(e) {
+    user = { name: "Kritika Giri", role: "SRE Lead" };
+  }
+
+  function renderAuthUI() {
+    if (user) {
+      if (userBadge) userBadge.style.display = 'flex';
+      if (loginBtn) loginBtn.style.display = 'none';
+      if (userNameEl) userNameEl.textContent = user.name;
+      if (userRoleEl) userRoleEl.textContent = user.role;
+    } else {
+      if (userBadge) userBadge.style.display = 'none';
+      if (loginBtn) loginBtn.style.display = 'inline-flex';
+    }
+  }
+
+  function openAuth(tab = 'login') {
+    if (!authModal) return;
+    authModal.style.display = 'flex';
+    switchTab(tab);
+  }
+
+  function closeAuth() {
+    if (!authModal) return;
+    authModal.style.display = 'none';
+  }
+
+  function switchTab(tab) {
+    if (!loginForm || !signupForm) return;
+    if (tab === 'login') {
+      loginForm.style.display = 'block';
+      signupForm.style.display = 'none';
+      if (tabLoginBtn) {
+        tabLoginBtn.style.background = 'rgba(139, 92, 246, 0.2)';
+        tabLoginBtn.style.borderColor = 'var(--accent-primary)';
+      }
+      if (tabSignupBtn) {
+        tabSignupBtn.style.background = 'transparent';
+        tabSignupBtn.style.borderColor = 'var(--border-subtle)';
+      }
+    } else {
+      loginForm.style.display = 'none';
+      signupForm.style.display = 'block';
+      if (tabSignupBtn) {
+        tabSignupBtn.style.background = 'rgba(139, 92, 246, 0.2)';
+        tabSignupBtn.style.borderColor = 'var(--accent-primary)';
+      }
+      if (tabLoginBtn) {
+        tabLoginBtn.style.background = 'transparent';
+        tabLoginBtn.style.borderColor = 'var(--border-subtle)';
+      }
+    }
+  }
+
+  if (loginBtn) loginBtn.addEventListener('click', () => openAuth('login'));
+  if (closeAuthBtn) closeAuthBtn.addEventListener('click', closeAuth);
+  if (tabLoginBtn) tabLoginBtn.addEventListener('click', () => switchTab('login'));
+  if (tabSignupBtn) tabSignupBtn.addEventListener('click', () => switchTab('signup'));
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      user = null;
+      localStorage.removeItem('sentinel_auth_user');
+      renderAuthUI();
+      showToast('Signed out of Sentinel Command Center.');
+      setTimeout(() => openAuth('login'), 350);
+    });
+  }
+
+  if (loginForm) {
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value.trim();
+      const role = document.getElementById('login-role').value;
+      const name = email.split('@')[0].replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+      user = {
+        name: name || "Engineering Lead",
+        email,
+        role,
+        token: "jwt_sentinel_" + btoa(JSON.stringify({ sub: email, role, exp: Date.now() + 86400000 }))
+      };
+      localStorage.setItem('sentinel_auth_user', JSON.stringify(user));
+      renderAuthUI();
+      closeAuth();
+      showToast(`Welcome, ${user.name}! Authenticated as ${role}.`);
+    });
+  }
+
+  if (quickDemoBtn) {
+    quickDemoBtn.addEventListener('click', () => {
+      user = {
+        name: "Technical Recruiter (Demo)",
+        email: "recruiter@interviews.ai",
+        role: "Technical Interviewer",
+        token: "jwt_sentinel_" + btoa(JSON.stringify({ sub: "recruiter", role: "Auditor", exp: Date.now() + 86400000 }))
+      };
+      localStorage.setItem('sentinel_auth_user', JSON.stringify(user));
+      renderAuthUI();
+      closeAuth();
+      showToast('Authenticated as Recruiter Demo User! Full cluster access granted.');
+    });
+  }
+
+  if (signupForm) {
+    signupForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('signup-name').value.trim();
+      const email = document.getElementById('signup-email').value.trim();
+      const role = document.getElementById('signup-role').value;
+
+      user = {
+        name,
+        email,
+        role,
+        token: "jwt_sentinel_" + btoa(JSON.stringify({ sub: email, role, exp: Date.now() + 86400000 }))
+      };
+      localStorage.setItem('sentinel_auth_user', JSON.stringify(user));
+      renderAuthUI();
+      closeAuth();
+      showToast(`Account created for ${name}! Logged in as ${role}.`);
+    });
+  }
+
+  renderAuthUI();
 }
